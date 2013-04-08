@@ -11,20 +11,27 @@ define dpb-common::app-generic (
             owner => $owner,
             group => $group,
             ;
+        "${name}/private" :
+            ensure => directory,
+            mode => 0700,
+            owner => $owner,
+            group => $group,
+            ;
+        "${name}/private/app.yaml" :
+            ensure => file,
+            content => inline_template('<%= { "install" => @name, "version" => @version, "owner" => @owner, "group" => @group, "config" => @config }.to_yaml %>'),
+            owner => $owner,
+            group => $group,
+            mode => 700,
+            require => File["${name}/private"],
+            ;
         "${name}/shared" :
             ensure => directory,
             mode => 0700,
             owner => $owner,
             group => $group,
             ;
-        "${name}/shared/etc" :
-            ensure => directory,
-            mode => 0700,
-            owner => $owner,
-            group => $group,
-            require => File["${name}/shared"],
-            ;
-        "${name}/shared/etc/ant.properties" :
+        "${name}/shared/app.properties" :
             ensure => file,
             content => "# auto-generated
 install=${name}
@@ -34,19 +41,6 @@ group=${group}",
             owner => $owner,
             group => $group,
             mode => 700,
-            ;
-        "${name}/shared/mnt" :
-            ensure => directory,
-            mode => 0700,
-            owner => $owner,
-            group => $group,
-            require => File["${name}/shared"],
-            ;
-        "${name}/shared/var" :
-            ensure => directory,
-            mode => 0700,
-            owner => $owner,
-            group => $group,
             require => File["${name}/shared"],
             ;
         "${name}/releases" :
