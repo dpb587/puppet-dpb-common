@@ -16,7 +16,7 @@ class dpb-common::supervisor {
 
     file {
         '/etc/init.d/supervisord' :
-            source => 'puppet:///dpb-common/files/initd-supervisord',
+            source => 'puppet:///modules/dpb-common/initd-supervisord',
             owner => 'root',
             group => 'root',
             mode => 0755,
