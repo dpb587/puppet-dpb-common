@@ -1,49 +1,56 @@
 define dpb-common::app-generic (
+    $install,
     $version,
     $owner,
     $group,
     $config,
+    $deploy_uri = "",
+    $deploy_ref = "master",
 ) {
     file {
-        "${name}" :
+        "${install}" :
             ensure => directory,
             mode => 0711,
             owner => $owner,
             group => $group,
             ;
-        "${name}/private" :
+        "${install}/private" :
             ensure => directory,
             mode => 0700,
             owner => $owner,
             group => $group,
             ;
-        "${name}/private/app.yaml" :
+        "${install}/private/app.yaml" :
             ensure => file,
-            content => inline_template('<%= { "install" => @name, "version" => @version, "owner" => @owner, "group" => @group, "config" => @config }.to_yaml %>'),
+            content => inline_template('<%= { "name" => @name, "install" => @install, "version" => @version, "owner" => @owner, "group" => @group, "deploy_uri" => @deploy_uri, "deploy_ref" => @deploy_ref, "config" => @config }.to_yaml %>'),
             owner => $owner,
             group => $group,
             mode => 700,
-            require => File["${name}/private"],
+            require => File["${install}/private"],
             ;
-        "${name}/shared" :
+        "${install}/shared" :
             ensure => directory,
             mode => 0700,
             owner => $owner,
             group => $group,
             ;
-        "${name}/shared/app.properties" :
+        "${install}/shared/app.properties" :
             ensure => file,
             content => "# auto-generated
-install=${name}
+name=${name}
+install=${install}
+environment=${::environment}
 version=${version}
 owner=${user}
-group=${group}",
+group=${group}
+deploy_uri=${deploy_uri}
+deploy_ref=${deploy_ref}",
             owner => $owner,
             group => $group,
             mode => 700,
-            require => File["${name}/shared"],
+            require => File["${install}/shared"],
             ;
-        "${name}/releases" :
+        "${install}/releases" :
             ensure => directory,
             mode => 0700,
             owner => $owner,
