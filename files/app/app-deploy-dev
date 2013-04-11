@@ -2,6 +2,7 @@
 
 set -e
 
+INSTALL_DIR=$PWD
 ENVIRONMENT=`grep environment shared/app.properties | sed -e 's/environment=\(.*\)$/\1/'`
 
 UPCOMING_DATE=`date +%Y%m%d%H%M%S`
@@ -19,7 +20,7 @@ echo " > deploy $UPCOMING_FULL"
     /usr/bin/puppet apply \
         --environment=$ENVIRONMENT \
         --modulepath=modules \
-        -e '\$app = merge(loadyaml("$PWD/../../private/app.yaml"), { deploy => { path => "$PWD", name => "$UPCOMING_NAME", date => "$UPCOMING_DATE" } }) include app::deploy'
+        -e '\$app = merge(loadyaml("$INSTALL_DIR/private/app.yaml"), { deploy => { path => "$PWD", name => "$UPCOMING_NAME", date => "$UPCOMING_DATE" } }) include app::deploy'
 EOF
 
 ant -Dapp.deploy.date="$UPCOMING_DATE" -Dapp.deploy.name="$UPCOMING_NAME" -Dapp.deploy.full="$UPCOMING_FULL" prepare
