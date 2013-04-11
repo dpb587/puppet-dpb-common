@@ -34,8 +34,8 @@ if [[ -f current ]]; then
     unlink current
 fi
 
-ln -s releases/$UPCOMING_FULL current
+ln -s releases/dev current
 
-cd releases/$UPCOMING_FULL
+cd releases/dev
 
 ant -Dapp.deploy.date="$UPCOMING_DATE" -Dapp.deploy.name="$UPCOMING_NAME" -Dapp.deploy.full="$UPCOMING_FULL" deploy
