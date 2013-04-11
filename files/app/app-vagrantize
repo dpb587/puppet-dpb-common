@@ -1,0 +1,7 @@
+#!/bin/sh
+
+git clone $1 $2/home
+cd $2
+GIT_DIR=home/.git git archive remotes/origin/devops | tar -x
+vagrant up
+vagrant ssh

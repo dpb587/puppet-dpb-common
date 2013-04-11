@@ -1,4 +1,4 @@
-define dpb-common::app-generic (
+define dpb-common::app::generic (
     $install,
     $version,
     $owner,
@@ -26,7 +26,9 @@ define dpb-common::app-generic (
             owner => $owner,
             group => $group,
             mode => 700,
-            require => File["${install}/private"],
+            require => [
+                File["${install}/private"],
+            ],
             ;
         "${install}/shared" :
             ensure => directory,
@@ -48,7 +50,9 @@ deploy_ref=${deploy_ref}",
             owner => $owner,
             group => $group,
             mode => 700,
-            require => File["${install}/shared"],
+            require => [
+                File["${install}/shared"],
+            ],
             ;
         "${install}/releases" :
             ensure => directory,

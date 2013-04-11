@@ -1,0 +1,63 @@
+#!/bin/sh
+
+set -e
+
+APP_ENVIRONMENT=`grep environment shared/app.properties | sed -e 's/environment=\(.*\)$/\1/'`
+APP_DEPLOY_URI=`grep deploy_uri shared/app.properties | sed -e 's/deploy_uri=\(.*\)$/\1/'`
+APP_DEPLOY_REF=`grep deploy_ref shared/app.properties | sed -e 's/deploy_ref=\(.*\)$/\1/'`
+
+if [[ -d releases/prep ]]; then
+    echo "releases/prep already exists"
+    
+    exit 1
+fi
+
+if [[ -d current ]]; then
+    git clone -o local file://current releases/prep
+
+    cd releases/prep
+    git remote add origin $APP_DEPLOY_URI
+    git pull --ff-only origin $APP_DEPLOY_REF
+
+    cd ../../
+else
+    git clone -b $APP_DEPLOY_REF $APP_DEPLOY_URI releases/prep
+fi
+
+UPCOMING_DATE=`date +%Y%m%d%H%M%S`
+UPCOMING_NAME=`(cd releases/prep && git rev-parse HEAD) | head -c10`
+UPCOMING_FULL="$UPCOMING_DATE-$UPCOMING_NAME"
+
+mv releases/prep releases/$UPCOMING_FULL
+
+cd releases/$UPCOMING_FULL
+
+echo " > version $UPCOMING_NAME"
+echo " > deploy $UPCOMING_FULL"
+
+/bin/sh <<EOF
+    cd deploy/boot/puppet
+    librarian-puppet install
+    /usr/bin/puppet apply \
+        --environment=$APP_ENVIRONMENT \
+        --modulepath=modules \
+        -e '\$app = merge(loadyaml("$PWD/../../private/app.yaml"), { deploy => { path => "$PWD", name => "$UPCOMING_NAME", date => "$UPCOMING_DATE" } }) include app::deploy'
+EOF
+
+ant -Dapp.deploy.date="$UPCOMING_DATE" -Dapp.deploy.name="$UPCOMING_NAME" -Dapp.deploy.full="$UPCOMING_FULL" prepare
+
+cd ../../
+
+if [[ -f current ]]; then
+    cd current/
+    ant undeploy
+    
+    cd ../
+    unlink current
+fi
+
+ln -s releases/$UPCOMING_FULL current
+
+cd releases/$UPCOMING_FULL
+
+ant -Dapp.deploy.date="$UPCOMING_DATE" -Dapp.deploy.name="$UPCOMING_NAME" -Dapp.deploy.full="$UPCOMING_FULL" deploy
