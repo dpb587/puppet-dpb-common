@@ -32,6 +32,7 @@ UPCOMING_FULL="$UPCOMING_DATE-$UPCOMING_NAME"
 mv releases/prep releases/$UPCOMING_FULL
 
 cd releases/$UPCOMING_FULL
+ln -s $INSTALL_DIR/shared mnt
 
 echo " > version $UPCOMING_NAME"
 echo " > deploy $UPCOMING_FULL"
@@ -49,7 +50,7 @@ ant -Dapp.deploy.date="$UPCOMING_DATE" -Dapp.deploy.name="$UPCOMING_NAME" -Dapp.
 
 cd ../../
 
-if [[ -f current ]]; then
+if [[ -s current ]]; then
     cd current/
     ant undeploy
     
