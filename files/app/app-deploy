@@ -39,7 +39,7 @@ echo " > deploy $UPCOMING_FULL"
 
 /bin/sh <<EOF
     cd deploy/boot/puppet
-    librarian-puppet install
+    [[ -f Puppetfile ]] && librarian-puppet install
     /usr/bin/puppet apply \
         --environment=$APP_ENVIRONMENT \
         --modulepath=modules \
