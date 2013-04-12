@@ -10,7 +10,7 @@ UPCOMING_NAME=dev
 UPCOMING_FULL="$UPCOMING_DATE-$UPCOMING_NAME"
 
 cd releases/dev
-ln -s $INSTALL_DIR/shared mnt
+[[ -s mnt ]] || ln -s $INSTALL_DIR/shared mnt
 
 echo " > version $UPCOMING_NAME"
 echo " > deploy $UPCOMING_FULL"
